@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>{% block title %}{% endblock %} /etc</title>
+  </head>
+
+  <body>
+    <div class="container">
+
+      <ul class="nav nav-pills float-right" style="margin-top:10px">
+      {% for name, endpoint in [('/', 'index')] %}
+        <li class="nav-item">
+          <a class="nav-link {{'active' if request.endpoint == endpoint}}" href="{{url_for(endpoint)}}">
+            {{name}}
+          </a>
+        </li>
+      {% endfor %}
+        <li class="nav-item">
+          <a class="nav-link {{'active' if request.endpoint == 'login'}}" href="{{url_for('login')}}">
+            <i class="fab fa-github"></i>
+            {% if session.get('user') %}
+              {{session.get('user')}}
+            {% else %}
+              Sign in
+            {% endif %}
+          </a>
+        </li>
+      </ul>
+
+      <h1>
+        <a href="/" style="color:inherit;text-decoration:inherit" _class="text-decoration-none">
+          /etc<span style="color:#def">hub</span>
+        </a>
+      </h1>
+      <hr>
+
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <section class="">
+          {% for message in messages %}
+          <div class="alert alert-info alert-dismissible fade show">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong>{{ message }}</strong>
+          </div>
+          {% endfor %}
+          </section>
+        {% endif %}
+      {% endwith %}
+
+      {% block body %}{% endblock %}
+    </div>
+
+    <!-- -->
+    <link rel="stylesheet" type="text/css" href="https://use.fontawesome.com/releases/v5.10.1/css/all.css"></link>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+    {% block script %}{% endblock %}
+  </body>
+</html>

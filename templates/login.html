@@ -1,0 +1,17 @@
+{% extends "html" %}
+{% block title %}login{% endblock %}
+{% block body %}
+{% if user %}
+  You are signed in with your Github account <code>{{user}}</code>.
+  Click here to <a href="{{url_for('logout')}}">sign out</a>.
+{% else %}
+  <a href="{{redirect}}">
+    Click here to sign in with Github.com
+  </a>
+
+  or
+  <a href="{{url_for('login', user='foo')}}">
+    fake login for dev purpose
+  </a>
+{% endif %}
+{% endblock %}
