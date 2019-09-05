@@ -1,0 +1,16 @@
+{% extends "html" %}
+{% block title %}error{% endblock %}
+{% block body %}
+  <h2>
+    {{code}}
+  </h2>
+  <strong>
+    {{title}}
+  </strong>
+  <p>
+    {{description}}
+  </p>
+  <p>
+    <a href="{{url}}">Retry</a>
+  </p>
+{% endblock %}
