@@ -3,39 +3,81 @@ REST Web Service
 """
 
 import flask
+import werkzeug
 import requests
+import sh
+import glob
 import random
 import logging
+import os
 
+logging.getLogger('sh').setLevel(logging.CRITICAL)
 log = logging.getLogger(__name__)
-#logging.getLogger('sh').setLevel(logging.CRITICAL)
 
 app = flask.Flask(__name__)
 app.secret_key = ''.join(str(random.random())[2:] for i in range(5))
 app.config['github_client_id'] = '9826ee3f2035ce2b3e40'
 app.config['github_client_secret'] = '5d2f2b37e3b51c8f6e492cf638bb0d8a0b58a666'
-app.config['files_path'] = '../files'
+app.config['files_path'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files')
 
 def error(title, description, url, code=500):
-    return flask.render_template('error.html',
-                                 title=title,
-                                 description=description,
-                                 url=url,
-                                 code=code), code
+    return flask.render_template('error.html', title=title, description=description, url=url, code=code), code
+
+@app.errorhandler(werkzeug.exceptions.HTTPException)
+def handle_error(e):
+    return error(title=e.name, description=e.description, url=None, code=e.code)
 
 @app.route('/')
 def index():
-    return flask.render_template('index.html')
+    files = [file[len(app.config['files_path'])+1:]
+             for file in glob.glob(os.path.join(app.config['files_path'], '*', '*'))]
+    return flask.render_template('index.html', files=files)
+
+@app.route('/file/<path:name>')
+def file(name):
+    with open(os.path.join(app.config['files_path'], name)) as f:
+        return f.read()
+
+@app.route('/upload')
+def upload():
+    if not flask.session.get('user'):
+        raise werkzeug.exceptions.Forbidden('Please sign in to upload.')
+    return flask.render_template('upload.html')
 
 @app.route('/upload', methods=['PUT'])
-def upload():
-    file_name = f"{str(random.random())[2:]}.sh"
-    file_body = 'echo hello world'
-    return '', 201
+def api_upload():
+    if not flask.session.get('user'):
+        return 'Please provide a cookie for authentication', 403
+
+    try:
+        fileob = flask.request.files['data']
+        sh.mkdir('-p', os.path.join(app.config['files_path'], flask.session['user']))
+        filename_user = os.path.join(flask.session['user'], fileob.filename)
+        filename_absolute = os.path.join(app.config['files_path'], filename_user)
+        fileob.save(filename_absolute)
+        log.info(f"Saved uploded file to {filename_absolute}")
+    except Exception as e:
+        try:
+            return f"Failed uploading {filename_user} ({e.__class__.__name__}: {e})", 500
+        except:
+            return f"Upload failed ({e.__class__.__name__}: {e})", 500
+
+    try:
+        git = sh.git.bake(git_dir=os.path.join(app.config['files_path'], '.git'),
+                          work_tree=app.config['files_path'])
+        git.add(filename_absolute)
+        try:
+            git.commit(message=f"Added by {flask.session['user']}")
+        except sh.ErrorReturnCode_1:
+            return f"File already exists with same content: {filename_user}", 202
+    except Exception as e:
+        return f"Failed versioning file: {filename_user} ({e.__class__.__name__}: {e})", 500
+
+    return f"Uploaded {fileob.filename}", 201
 
 @app.route('/logout')
 def logout():
-    flask.session['user'] = None
+    del flask.session['user']
     flask.flash('You signed out, see you !')
     #return flask.redirect(flask.url_for('login'))
     return flask.redirect(flask.url_for('index'))
@@ -47,6 +89,14 @@ def login():
                      description=f"{response.get('error_description')}", #)({response.get('error_uri')})",
                      url=flask.url_for('login'),
                      code=500)
+
+    #FIXME: dev purpose
+    #if flask.request.args.get('user'):
+    #   flask.session['user'] = flask.request.args.get('user')
+
+    if flask.session.get('user'):
+        return flask.render_template('login.html',
+                                     user=flask.session.get('user'))
 
     if flask.request.args.get('error'):
         return github_error(flask.request.args)
@@ -70,14 +120,6 @@ def login():
         #flask.session['user_avatar'] = user['avatar_url']
         flask.flash(f"Logged in as {flask.session['user']}")
         return flask.redirect(flask.url_for('index'))
-
-    #FIXME: dev purpose
-    #if flask.request.args.get('user'):
-    #    flask.session['user'] = flask.request.args.get('user')
-
-    if flask.session.get('user'):
-        return flask.render_template('login.html',
-                                     user=flask.session.get('user'))
 
     flask.session['last_state'] = ''.join(str(random.random())[2:] for i in range(5))
     auth_url = requests.Request('GET', 'https://github.com/login/oauth/authorize',

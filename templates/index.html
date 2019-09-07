@@ -1,11 +1,12 @@
 {% extends "html" %}
 {% block title %}{% endblock %}
 {% block body %}
-  Empty for now. Development in progress...
-  <ul>
-  {% for file in [] %}
-    <li>
-    </li>
-  {% endfor %}
-  </ul>
+  <div style="font-family: monospace">
+  {%- for file in files -%}
+    <a href="{{url_for('file', name=file)}}">{{file}}</a>
+    <br>
+  {%- else -%}
+    Nothing yet.
+  {%- endfor -%}
+</div>
 {% endblock %}
