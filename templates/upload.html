@@ -74,7 +74,6 @@ Or
         }
 
         $.each(files, function(i, file) {
-            console.log(file);
             var formData = new FormData();
             formData.append('data', file);
             $.ajax({
@@ -84,7 +83,6 @@ Or
                 contentType: false,
                 data: formData
             }).done(function(data, textStatus, jqXHR) {
-                console.log(data, textStatus, jqXHR)
                 log(jqXHR.responseText, 'success');
             }).fail(function(jqXHR, textStatus, errorThrown) {
                 log(jqXHR.responseText, 'danger');
