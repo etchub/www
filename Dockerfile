@@ -10,6 +10,9 @@ RUN pip install --upgrade pip && \
     rm /tmp/requirements.txt
 
 COPY . /www
+RUN cd /www/files && \
+    git config --global user.email "d@mien.ch" && \
+    git config --global user.name "Damien Corpataux"
 WORKDIR /
 
 CMD ["python3", "-m", "www"]
