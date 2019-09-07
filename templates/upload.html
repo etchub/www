@@ -65,7 +65,7 @@ Or
     function upload(files) {
 
         function log(text, context) {
-            var context = context || 'dark';
+            var context = context || 'dark';
             var icon = {'success': 'fas fa-check-circle',
                         'danger': 'fas fa-bug'}[context] || 'fas fa-info-circle';
             var line = $('<p>', {class: 'text-<context> mb-0'.replace('<context>', context),
