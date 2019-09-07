@@ -10,7 +10,9 @@
   <p>
     {{description}}
   </p>
+  {% if url %}
   <p>
     <a href="{{url}}">Retry</a>
   </p>
+  {% endif %}
 {% endblock %}

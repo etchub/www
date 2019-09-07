@@ -3,6 +3,7 @@ REST Web Service
 """
 
 import flask
+import werkzeug
 import requests
 import random
 import logging
@@ -17,11 +18,11 @@ app.config['github_client_secret'] = '5d2f2b37e3b51c8f6e492cf638bb0d8a0b58a666'
 app.config['files_path'] = '../files'
 
 def error(title, description, url, code=500):
-    return flask.render_template('error.html',
-                                 title=title,
-                                 description=description,
-                                 url=url,
-                                 code=code), code
+    return flask.render_template('error.html', title=title, description=description, url=url, code=code), code
+
+@app.errorhandler(werkzeug.exceptions.HTTPException)
+def handle_error(e):
+    return error(title=e.name, description=e.description, url=None, code=e.code)
 
 @app.route('/')
 def index():
