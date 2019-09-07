@@ -1,0 +1,128 @@
+{% extends "html" %}
+{% block title %}upload{% endblock %}
+{% block body %}
+
+{#
+Add a new file by entering it's URL. We will fetch it and add it for you.
+
+<form>
+  <div class="input-group mb-3">
+    <input type="text" class="form-control" placeholder="http://example.com/file">
+    <div class="input-group-append">
+      <button class="btn btn-success" type="submit">
+        Add
+      </button>
+    </div>
+  </div>
+</form>
+
+Or
+#}
+
+<div id="dropzone" class="card card-body" style="color:#ccc">
+  <div class="card-text text-center">
+    <i class="fas fa-cloud-upload-alt" style="font-size:3rem"></i>
+    <p class="mb-0" style="font-size:1.5rem">
+      Drag and drop a file here or click
+    </p>
+    <div class="log">
+    </div>
+  </div>
+  <input type="file" style="
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 5;">
+</div>
+
+Or
+<div class="card card-body">
+  <div class="card-text">
+    <code class="small">
+      curl
+      -X PUT
+      -H "Cookie: session={{request.cookies.get('session')}}"
+      -F data=@<span class="text-primary">/path/to/local/file</span> {{url_for('api_upload', _external=True)}}
+    </code>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+  $(document).ready(function() {
+
+    var $dropzone = $('#dropzone');
+
+    function upload(files) {
+
+        function log(text, context) {
+            var context = context || 'dark';
+            var icon = {'success': 'fas fa-check-circle',
+                        'danger': 'fas fa-bug'}[context] || 'fas fa-info-circle';
+            var line = $('<p>', {class: 'text-<context> mb-0'.replace('<context>', context),
+                                 html: [$('<i>', {class: icon}), ' ', text]});
+            $dropzone.find('.log').html(line);
+        }
+
+        $.each(files, function(i, file) {
+            console.log(file);
+            var formData = new FormData();
+            formData.append('data', file);
+            $.ajax({
+                url: '{{url_for("api_upload")}}',
+                method: "PUT",
+                processData: false,
+                contentType: false,
+                data: formData
+            }).done(function(data, textStatus, jqXHR) {
+                console.log(data, textStatus, jqXHR)
+                log(jqXHR.responseText, 'success');
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                log(jqXHR.responseText, 'danger');
+            });
+        });
+    }
+
+    $dropzone.on({
+
+        change: function(e) {
+            $(this).trigger('dragenter');
+            upload(e.target.files);
+        },
+
+        dragenter: function(e) {
+            e.preventDefault();
+            zone = $(this);
+            if (!zone.attr('data-last-style')) zone.attr('data-last-style', zone.attr('style'));
+            zone.css('color', 'white')
+                .css('background-color', '#ccc');
+        },
+
+        dragleave: function(e) {
+            e.preventDefault();
+            zone = $(this);
+            if (zone.attr('data-last-style'))
+                zone.attr('style', zone.attr('data-last-style'))
+                    .removeAttr('data-last-style');
+        },
+
+        drop: function(e) {
+            e.preventDefault();
+            upload(e.originalEvent.dataTransfer.files);
+        }
+
+    });
+
+  })
+</script>
+
+{% endblock %}

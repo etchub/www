@@ -14,13 +14,16 @@
   <body>
     <div class="container">
       <ul class="nav nav-pills float-right" style="margin-top:10px">
-      {% for name, endpoint in [('/', 'index')] %}
-        <li class="nav-item">
-          <a class="nav-link {{'active' if request.endpoint == endpoint}}" href="{{url_for(endpoint)}}">
-            {{name}}
-          </a>
-        </li>
-      {% endfor %}
+      {% with items = [('/', 'index', True),
+                       ('Upload', 'upload', session['user'])] %}
+        {% for name, endpoint, display in items if display %}
+          <li class="nav-item">
+            <a class="nav-link {{'active' if request.endpoint == endpoint}}" href="{{url_for(endpoint)}}">
+              {{name}}
+            </a>
+          </li>
+        {% endfor %}
+      {% endwith %}
         <li class="nav-item">
           <a class="nav-link {{'active' if request.endpoint == 'login'}}" href="{{url_for('login')}}">
             <i class="fab fa-github"></i>
