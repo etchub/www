@@ -50,12 +50,10 @@ def api_upload():
         return 'Please provide a cookie for authentication', 403
 
     try:
-        # from http://hundredminutehack.blogspot.com/2017/03/drag-and-drop-files-with-html5-and-flask.html
         fileob = flask.request.files['data']
-        filename = werkzeug.secure_filename(fileob.filename)
-        filename_user = os.path.join(flask.session['user'], filename)
+        sh.mkdir('-p', os.path.join(app.config['files_path'], flask.session['user']))
+        filename_user = os.path.join(flask.session['user'], fileob.filename)
         filename_absolute = os.path.join(app.config['files_path'], filename_user)
-        sh.mkdir('-p', filename_user)
         fileob.save(filename_absolute)
         log.info(f"Saved uploded file to {filename_absolute}")
     except Exception as e:

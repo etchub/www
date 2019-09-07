@@ -76,6 +76,7 @@ Or
         $.each(files, function(i, file) {
             var formData = new FormData();
             formData.append('data', file);
+            log('Uploading...');
             $.ajax({
                 url: '{{url_for("api_upload")}}',
                 method: "PUT",
