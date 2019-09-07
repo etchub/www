@@ -67,9 +67,9 @@ def api_upload():
                           work_tree=app.config['files_path'])
         git.add(filename_absolute)
         try:
-            git.commit(message=f"Added by {flask.session['user']}", porcelain=True)
+            git.commit(message=f"Added by {flask.session['user']}")
         except sh.ErrorReturnCode_1:
-            return f"Same file already exists: {filename_user}", 202
+            return f"File already exists with same content: {filename_user}", 202
     except Exception as e:
         return f"Failed versioning file: {filename_user} ({e.__class__.__name__}: {e})", 500
 
