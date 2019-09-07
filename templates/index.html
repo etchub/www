@@ -1,10 +1,12 @@
 {% extends "html" %}
 {% block title %}{% endblock %}
 {% block body %}
-  {% for file in files %}
+  <div style="font-family: monospace">
+  {%- for file in files -%}
     <a href="{{url_for('file', name=file)}}">{{file}}</a>
     <br>
-  {% else %}
+  {%- else -%}
     Nothing yet.
-  {% endfor %}
+  {%- endfor -%}
+</div>
 {% endblock %}
