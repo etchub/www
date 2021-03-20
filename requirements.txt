@@ -6,7 +6,7 @@ gitdb2==2.0.5
 GitPython==3.0.2
 idna==2.8
 itsdangerous==1.1.0
-Jinja2==2.10.1
+Jinja2==2.11.3
 MarkupSafe==1.1.1
 requests==2.22.0
 sh==1.12.14
